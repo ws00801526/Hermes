@@ -9,7 +9,64 @@
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
-## Requirements
+### Basic
+
+```swift
+    func basicUsage() {
+
+        MMRouter.register(with: "irouter://com.xmfraker.router/path/do", handler: {
+            print("this is registered handler \($0 ?? [:])")
+            if let completion = $0?[MMRouterCompletionHandlerKey] as? MMRouterCompletionHandler { completion(nil) }
+        })
+
+        // simple usage
+        MMRouter.route("irouter://com.xmfraker.router/path/do")
+        // simple usage with querys
+        MMRouter.route("irouter://com.xmfraker.router/path/do?name=FrakerXM&sex=male")
+        // simple usage with addtional paramters
+        let paramters = ["sex" : "male", "name" : "FrakerXM", "avatar" : UIImage(named: "what") as AnyObject]  as [String : AnyObject]
+        MMRouter.route("irouter://com.xmfraker.router/path/do", with: paramters)
+
+        // simple usage with completion
+        MMRouter.route("irouter://com.xmfraker.router/path/do") { _ in
+            print("this is completion handler")
+        }
+        MMRouter.unregisterAll()
+    }
+
+    func basicObjectUsage() {
+
+        MMRouter.register(with: "irouter://com.xmfraker/router/user", objectHandler: { _ -> AnyObject? in
+            return ["name" : "FrakerXM"] as AnyObject
+        })
+        let object = MMRouter.object(with: "irouter://com.xmfraker/router/user")
+    }
+```
+
+
+
+### Rewrite
+
+```swift
+    func rewriteUsage() {
+
+        // register custom search route url
+        MMRouter.register(with: "irouter://action/search", handler: {
+            print("will search kw \(($0?["kw"] as? String) ?? "")")
+        })
+
+        // add rewrite rule for search
+        MMRouter.addRewriteRule("(?:https://)?www.baidu.com/s\\?wd=(.*)", target: "irouter://action/search?kw=$$1")
+        MMRouter.addRewriteRule("(?:https://)?cn.bing.com/search\\?q=(.*)", target: "irouter://action/search?kw=$$1")
+
+        // route origin search url, will route the rewrite url
+        MMRouter.route("https://cn.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E8%AF%9D")
+        MMRouter.route("https://www.baidu.com/s?wd=中国话")
+    }
+```
+
+**more usage see [Test Cases](https://github.com/ws00801526/Hermes/blob/master/Example/Tests/HHRouterTests.swift)**
+
 
 ## Installation
 
