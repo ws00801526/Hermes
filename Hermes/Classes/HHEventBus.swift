@@ -41,38 +41,6 @@ public class HHEventBus {
 ////////////////////////////////////
 
 public extension HHEventBus {
-
-    
-    /// Post a event using NotificationCenter
-    ///
-    /// - Parameters:
-    ///   - name:     event name
-    ///   - sender:   event sender
-    ///   - onMain:   should post on main thread
-    public class func post(_ name: String, sender: Any? = nil, onMain: Bool = false) {
-        
-        let center = NotificationCenter.default
-        let notification = Notification.Name.init(name)
-        if onMain { DispatchQueue.main.async { center.post(name: notification, object: sender) } }
-        else { center.post(name: notification, object: sender) }
-    }
-
-    
-    /// Post a event using NotificationCenter
-    ///
-    /// - Parameters:
-    ///   - name:     event name
-    ///   - sender:   event sender
-    ///   - userInfo: additional paramters
-    ///   - onMain:   should post on main thread
-    public class func post(_ name: String, sender: Any? = nil, userInfo: [AnyHashable : Any]?, onMain: Bool = false) {
-        
-        let center = NotificationCenter.default
-        let notification = Notification.Name.init(name)
-        if onMain { DispatchQueue.main.async { center.post(name: notification, object: sender, userInfo: userInfo) } }
-        else { center.post(name: notification, object: sender, userInfo: userInfo) }
-    }
-    
     
     /// Post a event using NotificationQueue
     ///
@@ -80,14 +48,35 @@ public extension HHEventBus {
     ///   - name:     event name
     ///   - sender:   event sender
     ///   - userInfo: additional paramters
-    ///   - style:    posting style
     ///   - onMain:   should post on main thread
-    public class func post(_ name: String, sender: Any? = nil, userInfo: [AnyHashable : Any]?, style: NotificationQueue.PostingStyle = .now, onMain: Bool = false) {
+    public class func post(_ name: String, sender: Any? = nil, userInfo: [AnyHashable : Any]?) {
         
+        post(name, sender: sender, userInfo: userInfo, style: .now)
+    }
+    
+    /// Post a event using NotificationQueue
+    ///
+    /// - Parameters:
+    ///   - name:     event name
+    ///   - style:    posting style
+    public class func post(_ name: String, style: NotificationQueue.PostingStyle = .now) {
+        post(name, sender: nil, userInfo: nil, style: style)
+    }
+
+    /// Post a event using NotificationQueue
+    ///
+    /// - Parameters:
+    ///   - name:   event name
+    ///   - sender: event sender
+    ///   - userInfo: additional paramters
+    ///   - style: posting style.
+    ///   - coalesceMask: default is [.onName, .onSender]
+    ///   - modes: default is [.defaultRunLoopMode]
+    public class func post(_ name: String, sender: Any?, userInfo: [AnyHashable : Any]?, style: NotificationQueue.PostingStyle, coalesceMask: NotificationQueue.NotificationCoalescing = [.onName, .onSender], forModes modes: [RunLoop.Mode]? = [.defaultRunLoopMode]) {
+
         let queue = NotificationQueue.default
         let notification = Notification(name: .init(name), object: sender, userInfo: userInfo)
-        if onMain { DispatchQueue.main.async { queue.enqueue(notification, postingStyle: style) } }
-        else { queue.enqueue(notification, postingStyle: style) }
+        queue.enqueue(notification, postingStyle: style, coalesceMask: coalesceMask, forModes: modes)
     }
 }
 
@@ -97,6 +86,16 @@ public extension HHEventBus {
 
 public extension HHEventBus {
     
+    
+    /// Subscribe a event notfication
+    ///
+    /// - Parameters:
+    ///   - name:       notification name
+    ///   - target:     observer will be disposed by object
+    ///   - sender:     notification sender
+    ///   - queue:      the queue will execute the handler. If you pass nil, the block is run synchronously on the posting thread.
+    ///   - handler:    the handler
+    /// - Returns: the observer, you can remove it by yourself
     @discardableResult
     public class func on(_ name: String, offBy target: Any? = nil, sender: Any? = nil, queue: OperationQueue? = nil, handler: @escaping ((Notification?) -> Void)) -> NSObjectProtocol {
         
@@ -115,18 +114,31 @@ public extension HHEventBus {
         
         // support automatice remove observer after target is deinit
         if let target = target {
-            if let _ = objc_getAssociatedObject(target, &Key) as? DisposeBag { return observer }
+            let pointer = withUnsafePointer(to: &Key) { $0 }
+            if let _ = objc_getAssociatedObject(target, pointer) as? DisposeBag { return observer }
             objc_setAssociatedObject(target, &Key, DisposeBag(name, observer: observer), .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
 
         return observer
     }
     
+    
+    /// Subscribe a event and handler will be executed in background thread
+    ///
+    /// - Parameters:
+    ///   - name:       notification name
+    ///   - target:     observer will be disposed by object
+    ///   - sender:     notification sender
+    ///   - handler:    the handler
+    /// - Returns: the observer, you can remove it by yourself
     @discardableResult
     public class func onBackground(_ name: String, offBy target: Any? = nil, sender: Any? = nil, handler: @escaping ((Notification?) -> Void)) -> NSObjectProtocol {
         return on(name, offBy: target, sender: sender, queue: OperationQueue(), handler: handler)
     }
-
+    
+    /// unsubscribe event by name
+    /// will unsubscribe all observers with the same name
+    /// - Parameter name: the name of event
     public class func off(_ name: String) {
         let id = UInt(bitPattern: ObjectIdentifier(name as AnyObject))
         let center = NotificationCenter.default
@@ -139,6 +151,12 @@ public extension HHEventBus {
         }
     }
     
+    
+    /// unsubscribe event by name and observer
+    ///
+    /// - Parameters:
+    ///   - name:       the name of event
+    ///   - observer:   he subscribed observer
     public class func off(_ name: String, observer: NSObjectProtocol) {
         let id = UInt(bitPattern: ObjectIdentifier(name as AnyObject))
         let center = NotificationCenter.default
