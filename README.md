@@ -1,6 +1,6 @@
 # Hermes
 
-[![CI Status](https://img.shields.io/travis/ws00801526/Hermes.svg?style=flat)](https://travis-ci.org/ws00801526/Hermes)
+[![Build Status](https://travis-ci.com/ws00801526/Hermes.svg?branch=master)](https://travis-ci.com/ws00801526/Hermes)
 [![Version](https://img.shields.io/cocoapods/v/Hermes.svg?style=flat)](https://cocoapods.org/pods/Hermes)
 [![License](https://img.shields.io/cocoapods/l/Hermes.svg?style=flat)](https://cocoapods.org/pods/Hermes)
 [![Platform](https://img.shields.io/cocoapods/p/Hermes.svg?style=flat)](https://cocoapods.org/pods/Hermes)
@@ -114,7 +114,7 @@ it, simply add the following line to your Podfile:
 
 ```ruby
 pod 'Hermes' // use all sub specs such as router,event bus
-pod 'Hermes/EventBus' // just use event bus 
+pod 'Hermes/EventBus' // just use event bus
 pod 'Hermes/Router'   // just use router
 ```
 
