@@ -17,9 +17,32 @@ class TestObject: NSObject {
 
 class ViewController: UIViewController {
 
+    var testObject2: TestObject?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+
         
+        HHEventBus.on("simple") {
+            print("simple \($0?.userInfo)")
+        }
+        
+
+//        DispatchQueue.global().async {
+//            HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "asap"], style: .asap, onMain: false)
+//        }
+        
+        HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "asap"], style: .asap, coalesceMask: [.none])
+        
+        HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "now"], style: .now, coalesceMask: [.none])
+
+//        print("before sleep")
+//        sleep(200)
+//        print("after sleep")
+//        HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "now"], style: .now, onMain: false)
+//
+//        HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "whenIdle"], style: .whenIdle, onMain: false)
+
 //        HHEventBus.post("xxxx")
 //
 ////        HHEventBus.on(self, name: "xxxx") {
@@ -50,26 +73,10 @@ class ViewController: UIViewController {
 //            NotificationQueue.default.enqueue(notification, postingStyle: .now)
 //        }
         
-        let testObject = TestObject()
-        
-        HHEventBus.on("xxxx") { _ in
-            print("here is testObject ")
-        }
-        
-        HHEventBus.on("xxxx", offBy: testObject, sender: nil, queue: nil) { _ in
-            print("here is testObject with test")
-        }
 
-        HHEventBus.post("xxxx")
-        
-//        NotificationCenter.default.removeObserver(observer)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            HHEventBus.post("xxxx")
-        }
         // Do any additional setup after loading the view, typically from a nib.
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.

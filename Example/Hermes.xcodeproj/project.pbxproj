@@ -15,6 +15,7 @@
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		8DACABA60D842755A645E6DA /* Pods_Hermes_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9994AF2A4520923C10FCCF43 /* Pods_Hermes_Example.framework */; };
 		97339D90224CD3BF00097064 /* HHRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97339D8F224CD3BF00097064 /* HHRouterTests.swift */; };
+		97339D952251B6BE00097064 /* HHEventBusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97339D942251B6BE00097064 /* HHEventBusTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 		8180080DA3331729027E5AD6 /* Pods-Hermes_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hermes_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Hermes_Example/Pods-Hermes_Example.release.xcconfig"; sourceTree = "<group>"; };
 		97339D8E224CD3BE00097064 /* Hermes_Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Hermes_Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		97339D8F224CD3BF00097064 /* HHRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HHRouterTests.swift; sourceTree = "<group>"; };
+		97339D942251B6BE00097064 /* HHEventBusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HHEventBusTests.swift; sourceTree = "<group>"; };
 		9994AF2A4520923C10FCCF43 /* Pods_Hermes_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hermes_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E8CB8E5CB3B32EE0C3665DB /* Pods_Hermes_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hermes_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7E36F6D54AF6F781E4ED9C2 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 				97339D8F224CD3BF00097064 /* HHRouterTests.swift */,
 				97339D8E224CD3BE00097064 /* Hermes_Tests-Bridging-Header.h */,
+				97339D942251B6BE00097064 /* HHEventBusTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -210,7 +213,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = CocoaPods;
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
@@ -373,6 +376,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				97339D90224CD3BF00097064 /* HHRouterTests.swift in Sources */,
+				97339D952251B6BE00097064 /* HHEventBusTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,12 +422,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -471,12 +477,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
