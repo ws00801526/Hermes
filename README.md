@@ -9,7 +9,44 @@
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
-### Basic
+
+### Router
+
+```swift
+    
+    func basic() {
+        
+        // subscribe event with name
+        HHEventBus.on("event name") { note in
+            // here is notification handler
+        }
+        
+        // subscribe event with name and handler will be executed in background
+        HHEventBus.onBackground("event name") { note in
+        
+        }
+        
+        // post a note with name
+        HHEventBus.post("event name")
+        
+        // post a note with name, if you dont need handler executed immediately
+        // default coalesceMask = [.onName, .onSender]
+        // so if you post a notification many times, its handler may be executed once
+        
+        // this may be send many times, but handler may be executed once
+        HHEventBus.post("event name", style: .whenIdle)
+        
+        // same as HHEventBus.post("event name")
+        // .now        post immediately
+        // .asap       post when current scope is over
+        // .whenIdle   only post when current runloop is idle
+        HHEventBus.post("event name", style: .now)
+        
+        }
+}
+```
+
+#### Basic
 
 ```swift
     func basicUsage() {
@@ -45,7 +82,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 
 
-### Rewrite
+#### Rewrite
 
 ```swift
     func rewriteUsage() {
@@ -74,7 +111,9 @@ Hermes is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'Hermes'
+pod 'Hermes' // use all sub specs such as router,event bus
+pod 'Hermes/EventBus' // just use event bus 
+pod 'Hermes/Router'   // just use router
 ```
 
 ## Author
