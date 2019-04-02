@@ -72,7 +72,7 @@ public extension HHEventBus {
     ///   - style: posting style.
     ///   - coalesceMask: default is [.onName, .onSender]
     ///   - modes: default is [.defaultRunLoopMode]
-    public class func post(_ name: String, sender: Any?, userInfo: [AnyHashable : Any]?, style: NotificationQueue.PostingStyle, coalesceMask: NotificationQueue.NotificationCoalescing = [.onName, .onSender], forModes modes: [RunLoop.Mode]? = [.defaultRunLoopMode]) {
+    public class func post(_ name: String, sender: Any?, userInfo: [AnyHashable : Any]?, style: NotificationQueue.PostingStyle, coalesceMask: NotificationQueue.NotificationCoalescing = [.onName, .onSender], forModes modes: [RunLoop.Mode]? = nil) {
 
         let queue = NotificationQueue.default
         let notification = Notification(name: .init(name), object: sender, userInfo: userInfo)

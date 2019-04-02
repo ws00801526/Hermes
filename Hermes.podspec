@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/ws00801526/Hermes.git', :tag => s.version.to_s }
   s.ios.deployment_target = '8.0'
   s.default_subspecs = 'Router', 'EventBus'
-
+  s.swift_version = '4.2'
   s.subspec 'Router' do |ss|
       ss.source_files = 'Hermes/Classes/HHRouter.swift'
   end
