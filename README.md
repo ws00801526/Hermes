@@ -53,32 +53,32 @@ HHEventBus.post("event name", style: .now)
 ```swift
     func basicUsage() {
 
-        MMRouter.register(with: "irouter://com.xmfraker.router/path/do", handler: {
+        HHRouter.register(with: "irouter://com.xmfraker.router/path/do", handler: {
             print("this is registered handler \($0 ?? [:])")
-            if let completion = $0?[MMRouterCompletionHandlerKey] as? MMRouterCompletionHandler { completion(nil) }
+            if let completion = $0?[HHRouterCompletionHandlerKey] as? HHRouterCompletionHandler { completion(nil) }
         })
 
         // simple usage
-        MMRouter.route("irouter://com.xmfraker.router/path/do")
+        HHRouter.route("irouter://com.xmfraker.router/path/do")
         // simple usage with querys
-        MMRouter.route("irouter://com.xmfraker.router/path/do?name=FrakerXM&sex=male")
+        HHRouter.route("irouter://com.xmfraker.router/path/do?name=FrakerXM&sex=male")
         // simple usage with addtional paramters
         let paramters = ["sex" : "male", "name" : "FrakerXM", "avatar" : UIImage(named: "what") as AnyObject]  as [String : AnyObject]
-        MMRouter.route("irouter://com.xmfraker.router/path/do", with: paramters)
+        HHRouter.route("irouter://com.xmfraker.router/path/do", with: paramters)
 
         // simple usage with completion
-        MMRouter.route("irouter://com.xmfraker.router/path/do") { _ in
+        HHRouter.route("irouter://com.xmfraker.router/path/do") { _ in
             print("this is completion handler")
         }
-        MMRouter.unregisterAll()
+        HHRouter.unregisterAll()
     }
 
     func basicObjectUsage() {
 
-        MMRouter.register(with: "irouter://com.xmfraker/router/user", objectHandler: { _ -> AnyObject? in
+        HHRouter.register(with: "irouter://com.xmfraker/router/user", objectHandler: { _ -> AnyObject? in
             return ["name" : "FrakerXM"] as AnyObject
         })
-        let object = MMRouter.object(with: "irouter://com.xmfraker/router/user")
+        let object = HHRouter.object(with: "irouter://com.xmfraker/router/user")
     }
 ```
 
@@ -90,17 +90,17 @@ HHEventBus.post("event name", style: .now)
     func rewriteUsage() {
 
         // register custom search route url
-        MMRouter.register(with: "irouter://action/search", handler: {
+        HHRouter.register(with: "irouter://action/search", handler: {
             print("will search kw \(($0?["kw"] as? String) ?? "")")
         })
 
         // add rewrite rule for search
-        MMRouter.addRewriteRule("(?:https://)?www.baidu.com/s\\?wd=(.*)", target: "irouter://action/search?kw=$$1")
-        MMRouter.addRewriteRule("(?:https://)?cn.bing.com/search\\?q=(.*)", target: "irouter://action/search?kw=$$1")
+        HHRouter.addRewriteRule("(?:https://)?www.baidu.com/s\\?wd=(.*)", target: "irouter://action/search?kw=$$1")
+        HHRouter.addRewriteRule("(?:https://)?cn.bing.com/search\\?q=(.*)", target: "irouter://action/search?kw=$$1")
 
         // route origin search url, will route the rewrite url
-        MMRouter.route("https://cn.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E8%AF%9D")
-        MMRouter.route("https://www.baidu.com/s?wd=中国话")
+        HHRouter.route("https://cn.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E8%AF%9D")
+        HHRouter.route("https://www.baidu.com/s?wd=中国话")
     }
 ```
 
