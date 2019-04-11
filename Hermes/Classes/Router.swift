@@ -1,30 +1,30 @@
-//  HHRouter.swift
+//  Router.swift
 //  Pods
 //
 //  Created by  XMFraker on 2019/3/28
 //  Copyright © XMFraker All rights reserved. (https://github.com/ws00801526)
-//  @class      HHRouter
+//  @class      Router
 
-public typealias HHRouterHandler = ([String : AnyObject]?) -> Void
-public typealias HHRouterObjectHandler = ([String : AnyObject]?) -> AnyObject?
-public typealias HHRouterCompletionHandler = (AnyObject?) -> Void
+public typealias RouterHandler = ([String : AnyObject]?) -> Void
+public typealias RouterObjectHandler = ([String : AnyObject]?) -> AnyObject?
+public typealias RouterCompletionHandler = (AnyObject?) -> Void
 
 
 /// get URL from handler.userInfo. the object Class should be URL or NSURL
-public let HHRouterURLKey                 = "HHRouterURLKey"
+public let RouterURLKey                 = "RouterURLKey"
 /// get completion handler from handler.userInfo
-public let HHRouterCompletionHandlerKey   = "HHRouterHandlerKey"
-public let HHRouterURLWildcardCharacter   = "*"
+public let RouterCompletionHandlerKey   = "RouterCompletionHandlerKey"
+public let RouterURLWildcardCharacter   = "*"
 
-class HHRoute {
+class Route {
     
     var path: String?
-    var handler: HHRouterHandler?
-    var objectHandler: HHRouterObjectHandler?
-    weak var parent: HHRoute?
-    var subRoutes: [String : HHRoute] = [:]
+    var handler: RouterHandler?
+    var objectHandler: RouterObjectHandler?
+    weak var parent: Route?
+    var subRoutes: [String : Route] = [:]
     
-    init(path: String? = nil, parent route: HHRoute? = nil) {
+    init(path: String? = nil, parent route: Route? = nil) {
         self.path = path
         self.parent = route
     }
@@ -37,16 +37,16 @@ class HHRoute {
     }
 }
 
-public class HHRouter {
+public class Router {
     
-    public static let shared = HHRouter()
+    public static let shared = Router()
     
     // using concurrent barrier for thread safe
     let queue = DispatchQueue.init(label: "com.xmfraker.Hermes.Router", attributes: .concurrent)
     lazy var rules: [String : String] = [:]
-    lazy var routes: HHRoute = HHRoute()
+    lazy var routes: Route = Route()
     
-    func addRoute(with url: URL, handler: @escaping HHRouterHandler) {
+    func addRoute(with url: URL, handler: @escaping RouterHandler) {
         
         // just using barrier for write opeation
         queue.async(flags: .barrier) { [unowned self] in
@@ -55,7 +55,7 @@ public class HHRouter {
         }
     }
     
-    func addObjectRoute(with url: URL, handler: @escaping HHRouterObjectHandler) {
+    func addObjectRoute(with url: URL, handler: @escaping RouterObjectHandler) {
         
         // just using barrier for write opeation
         queue.async(flags: .barrier) { [unowned self] in
@@ -64,7 +64,7 @@ public class HHRouter {
         }
     }
     
-    func getRoutes() -> HHRoute? {
+    func getRoutes() -> Route? {
         return queue.sync { routes }
     }
     
@@ -76,7 +76,7 @@ public class HHRouter {
             route.objectHandler = nil
             
             // clear subRoutes if needed
-            var parent: HHRoute? = route
+            var parent: Route? = route
             while parent != nil {
                 parent?.clear()
                 parent = parent?.parent
@@ -100,7 +100,7 @@ public class HHRouter {
         }
     }
     
-    func removeRewirte(rule: String) {
+    func removeRewrite(rule: String) {
         guard rule.count > 0 else { return }
         queue.async(flags: .barrier) { [unowned self] in
             self.rules.removeValue(forKey: rule)
@@ -109,11 +109,11 @@ public class HHRouter {
 }
 
 
-extension HHRouter {
+extension Router {
     
     func mergeQueryItems(of url: URL, with paramters: [String : AnyObject]) -> [String : AnyObject] {
         
-        var result: [String : AnyObject] = [HHRouterURLKey : url as AnyObject]
+        var result: [String : AnyObject] = [RouterURLKey : url as AnyObject]
         
         // parse querys from url.query
         if let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
@@ -143,25 +143,25 @@ extension HHRouter {
         return components
     }
     
-    func createRoutes(of url: URL? = nil) -> HHRoute? {
+    func createRoutes(of url: URL? = nil) -> Route? {
         
         guard let url = url else { return routes }
         
         let paths = getRoutePaths(of: url)
         guard !paths.isEmpty else { return routes }
         
-        var route: HHRoute? = routes
+        var route: Route? = routes
         for path in paths {
             // create sub route if not exists
             if route?.subRoutes[path] == nil {
-                route?.subRoutes[path] = HHRoute(path: path, parent: route)
+                route?.subRoutes[path] = Route(path: path, parent: route)
             }
             route = route?.subRoutes[path]
         }
         return route
     }
     
-    func getRoute(of url: URL) -> HHRoute? {
+    func getRoute(of url: URL) -> Route? {
         
         guard var route = getRoutes() else { return nil }
         let paths = getRoutePaths(of: url)
@@ -171,9 +171,9 @@ extension HHRouter {
             // find route using path
             if let tempRoute = route.subRoutes[path] { route = tempRoute }
                 // find wildcard route.handler to handle
-            else if let tempRoute = route.subRoutes[HHRouterURLWildcardCharacter] { route = tempRoute }
+            else if let tempRoute = route.subRoutes[RouterURLWildcardCharacter] { route = tempRoute }
                 // if it is a wildcard route, using it
-            else if let path = route.path, path ==  HHRouterURLWildcardCharacter { break }
+            else if let path = route.path, path ==  RouterURLWildcardCharacter { break }
                 // giveup find next route, using global route
             else { route = getRoutes()!; break }
         }
@@ -190,13 +190,13 @@ extension HHRouter {
 // Route
 ////////////////////////////////////
 
-public extension HHRouter {
+public extension Router {
     
     
     /// Set a global handler for unregistered url
     ///
     /// - Parameter handler: handler will be excuted after routed
-    public class func setGlobal(handler: HHRouterHandler?) {
+    class func setGlobal(handler: RouterHandler?) {
         shared.queue.sync { shared.routes.handler = handler }
     }
     
@@ -205,7 +205,7 @@ public extension HHRouter {
     /// - Parameters:
     ///   - URLString: url will be routed
     ///   - handler: handler will be excuted after routed
-    public class func register(_ pattern: String, handler: @escaping HHRouterHandler) {
+    class func register(_ pattern: String, handler: @escaping RouterHandler) {
         
         guard let url = URL(string: pattern)   else { return }
         shared.addRoute(with: url, handler: handler)
@@ -217,7 +217,7 @@ public extension HHRouter {
     /// - Parameters:
     ///   - URLString: url will be routed
     ///   - handler: handler will be excuted after routed and return the object
-    public class func register(_ pattern: String,  objectHandler handler: @escaping HHRouterObjectHandler) {
+    class func register(_ pattern: String,  objectHandler handler: @escaping RouterObjectHandler) {
         guard let url = URL(string: pattern)   else { return }
         shared.addObjectRoute(with: url, handler: handler)
     }
@@ -226,13 +226,13 @@ public extension HHRouter {
     /// Unregister a url
     ///
     /// - Parameter URLString: url will be unregistered
-    public class func unregister(_ pattern: String) {
+    class func unregister(_ pattern: String) {
         guard let url = URL(string: pattern)   else { return }
         shared.removeRoute(with: url)
     }
     
     /// Unregistered all urls
-    public class func unregisterAll() {
+    class func unregisterAll() {
         shared.removeRoutes()
     }
     
@@ -242,12 +242,12 @@ public extension HHRouter {
     ///   - string:    url to be routed
     ///   - paramters: additional paramters, will override same key if key exists in url.querys
     ///   - completion:   completion handler, will be called in registered handler
-    public class func route(_ pattern: String, with paramters: [String : AnyObject] = [:], completion: HHRouterCompletionHandler? = nil) {
+    class func route(_ pattern: String, with paramters: [String : AnyObject] = [:], completion: RouterCompletionHandler? = nil) {
         
         guard let url = rewrite(pattern)            else { return }
         
         var userInfo = shared.mergeQueryItems(of: url, with: paramters)
-        if let completion = completion { userInfo[HHRouterCompletionHandlerKey] = completion as AnyObject }
+        if let completion = completion { userInfo[RouterCompletionHandlerKey] = completion as AnyObject }
         
         guard let route = shared.getRoute(of: url) else { return }
         if let executor = route.handler { executor(userInfo) }
@@ -260,7 +260,7 @@ public extension HHRouter {
     ///   - string:    url to be routed
     ///   - paramters: additional paramters
     /// - Returns: the object returned from registered url handler
-    public class func object(with string: String, paramters: [String : AnyObject] = [:]) -> AnyObject? {
+    class func object(with string: String, paramters: [String : AnyObject] = [:]) -> AnyObject? {
         
         guard let url = rewrite(string)            else { return nil }
         let userInfo = shared.mergeQueryItems(of: url, with: paramters)
@@ -275,7 +275,7 @@ public extension HHRouter {
     ///
     /// - Parameter string: url string to be verified
     /// - Returns: url string can be routed
-    public class func canRoute(with string: String) -> Bool {
+    class func canRoute(with string: String) -> Bool {
         
         guard let url = rewrite(string)             else { return false }
         guard let route = shared.getRoute(of: url)  else { return false }
@@ -299,14 +299,14 @@ extension URL {
 // Rewrite
 ////////////////////////////////////
 
-public extension HHRouter {
+public extension Router {
     
     
     /// Rewrite orgin url string, support urlencode(origin)
     ///
     /// - Parameter origin: the origin url string
     /// - Returns: an rewrited URL
-    public class func rewrite(_ origin: String) -> URL? {
+    class func rewrite(_ origin: String) -> URL? {
         
         let rules = shared.getRules()
         
@@ -349,14 +349,21 @@ public extension HHRouter {
     /// - Parameters:
     ///   - rule:   rule which supports regular
     ///   - target: the targer url to route
-    public class func addRewrite(_ rule: String, target: String) {
+    class func addRewrite(_ rule: String, target: String) {
         shared.addRewrite(rule: rule, target: target)
     }
     
     /// Remove a rewrite rule
     ///
     /// - Parameter rule: rule which supports regular
-    public class func removeRewrite(_ rule: String) {
-        shared.removeRewirte(rule: rule)
+    class func removeRewrite(_ rule: String) {
+        shared.removeRewrite(rule: rule)
+    }
+    
+    /// Get added rewrite rules
+    ///
+    /// - Returns: rules
+    class func getRules() -> [String : String] {
+        return shared.getRules()
     }
 }

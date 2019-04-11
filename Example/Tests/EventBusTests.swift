@@ -15,7 +15,7 @@ class Bag {
     
 }
 
-class HHEventBusTests: QuickSpec {
+class EventBusTests: QuickSpec {
     override func spec() {
 
         
@@ -28,28 +28,28 @@ class HHEventBusTests: QuickSpec {
                 var basicManualCount = 0
                 var bag: Bag? = Bag()
 
-                HHEventBus.on("basic") { _ in
+                EventBus.on("basic") { _ in
                     // this should receive over one time
                     print("here is basic")
                     basicCount += 1
                 }
                 
-                HHEventBus.on("basic", offBy: bag) { _ in
+                EventBus.on("basic", offBy: bag) { _ in
                     // this should only receive one time
                     print("here is basic with automatic remove observer")
                     basicAutoCount += 1
                 }
                 
-                let observer = HHEventBus.on("basic", handler: { _ in
+                let observer = EventBus.on("basic", handler: { _ in
                     print("here is basic with manually remove observer")
                     basicManualCount += 1
                 })
                 
-                HHEventBus.post("basic")
+                EventBus.post("basic")
                 
                 bag = nil
                 NotificationCenter.default.removeObserver(observer)
-                HHEventBus.post("basic")
+                EventBus.post("basic")
 
                 expect(basicCount).toEventually(equal(2))
                 expect(basicAutoCount).toEventually(equal(1))
@@ -65,7 +65,7 @@ class HHEventBusTests: QuickSpec {
                 }
                 
                 beforeSuite {
-                    HHEventBus.on("queue", handler: { _ in
+                    EventBus.on("queue", handler: { _ in
                         print("here is queue")
                         queue += 1
                     })
@@ -73,14 +73,14 @@ class HHEventBusTests: QuickSpec {
                 
                 it("test with queue", closure: {
                     for _ in 0...10 {
-                        HHEventBus.post("queue", style: .whenIdle)
+                        EventBus.post("queue", style: .whenIdle)
                     }
                     expect(queue).toEventually(equal(1))
                 })
                 
                 it("test without queue", closure: {
                     for _ in 0...10 {
-                        HHEventBus.post("queue")
+                        EventBus.post("queue")
                     }
                     expect(queue).to(equal(11))
                 })

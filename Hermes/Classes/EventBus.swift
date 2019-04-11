@@ -1,9 +1,9 @@
-//  HHEventBus.swift
+//  EventBus.swift
 //  Pods
 //
 //  Created by  XMFraker on 2019/3/28
 //  Copyright © XMFraker All rights reserved. (https://github.com/ws00801526)
-//  @class      HHEventBus
+//  @class      EventBus
 
 import Foundation
 
@@ -13,7 +13,7 @@ fileprivate struct CachedObserver {
 }
 
 fileprivate var Key: Int = 101
-fileprivate class DisposeBag {
+public class DisposeBag {
     
     let name: String
     weak var observer: NSObjectProtocol?
@@ -23,14 +23,18 @@ fileprivate class DisposeBag {
         self.observer = observer
     }
     
+    public func dispose() {
+        if let observer = observer { EventBus.off(name, observer: observer) }
+    }
+    
     deinit {
-        if let observer = observer { HHEventBus.off(name, observer: observer) }
+        dispose()
     }
 }
 
-public class HHEventBus {
+public class EventBus {
 
-    fileprivate static let shared = HHEventBus()
+    fileprivate static let shared = EventBus()
     fileprivate let queue = DispatchQueue(label: "com.xmfraker.Hermes.EventBus")
     fileprivate var caches: [UInt : [CachedObserver]] = [:]
 }
@@ -40,7 +44,7 @@ public class HHEventBus {
 // Publish
 ////////////////////////////////////
 
-public extension HHEventBus {
+public extension EventBus {
     
     /// Post a event using NotificationQueue
     ///
@@ -48,9 +52,7 @@ public extension HHEventBus {
     ///   - name:     event name
     ///   - sender:   event sender
     ///   - userInfo: additional paramters
-    ///   - onMain:   should post on main thread
-    public class func post(_ name: String, sender: Any? = nil, userInfo: [AnyHashable : Any]?) {
-        
+    class func post(_ name: String, sender: Any? = nil, userInfo: [AnyHashable : Any]?) {
         post(name, sender: sender, userInfo: userInfo, style: .now)
     }
     
@@ -59,7 +61,7 @@ public extension HHEventBus {
     /// - Parameters:
     ///   - name:     event name
     ///   - style:    posting style
-    public class func post(_ name: String, style: NotificationQueue.PostingStyle = .now) {
+    class func post(_ name: String, style: NotificationQueue.PostingStyle = .now) {
         post(name, sender: nil, userInfo: nil, style: style)
     }
 
@@ -72,7 +74,7 @@ public extension HHEventBus {
     ///   - style: posting style.
     ///   - coalesceMask: default is [.onName, .onSender]
     ///   - modes: default is [.defaultRunLoopMode]
-    public class func post(_ name: String, sender: Any?, userInfo: [AnyHashable : Any]?, style: NotificationQueue.PostingStyle, coalesceMask: NotificationQueue.NotificationCoalescing = [.onName, .onSender], forModes modes: [RunLoop.Mode]? = nil) {
+    class func post(_ name: String, sender: Any?, userInfo: [AnyHashable : Any]?, style: NotificationQueue.PostingStyle, coalesceMask: NotificationQueue.NotificationCoalescing = [.onName, .onSender], forModes modes: [RunLoop.Mode]? = nil) {
 
         let queue = NotificationQueue.default
         let notification = Notification(name: .init(name), object: sender, userInfo: userInfo)
@@ -84,7 +86,7 @@ public extension HHEventBus {
 // Subscribe
 ////////////////////////////////////
 
-public extension HHEventBus {
+public extension EventBus {
     
     
     /// Subscribe a event notfication
@@ -95,9 +97,9 @@ public extension HHEventBus {
     ///   - sender:     notification sender
     ///   - queue:      the queue will execute the handler. If you pass nil, the block is run synchronously on the posting thread.
     ///   - handler:    the handler
-    /// - Returns: the observer, you can remove it by yourself
+    /// - Returns: the dispose bag, call bag.dispose() will remove observer
     @discardableResult
-    public class func on(_ name: String, offBy target: Any? = nil, sender: Any? = nil, queue: OperationQueue? = nil, handler: @escaping ((Notification?) -> Void)) -> NSObjectProtocol {
+    class func on(_ name: String, offBy target: Any? = nil, sender: Any? = nil, queue: OperationQueue? = nil, handler: @escaping ((Notification?) -> Void)) -> DisposeBag {
         
         let id = UInt(bitPattern: ObjectIdentifier(name as AnyObject))
         let notification: Notification.Name = Notification.Name.init(name)
@@ -112,14 +114,15 @@ public extension HHEventBus {
             }
         }
         
+        let disposeBag = DisposeBag(name, observer: observer)
         // support automatice remove observer after target is deinit
         if let target = target {
             let pointer = withUnsafePointer(to: &Key) { $0 }
-            if let _ = objc_getAssociatedObject(target, pointer) as? DisposeBag { return observer }
-            objc_setAssociatedObject(target, &Key, DisposeBag(name, observer: observer), .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            if let bag = objc_getAssociatedObject(target, pointer) as? DisposeBag { return bag }
+            objc_setAssociatedObject(target, &Key, disposeBag, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
 
-        return observer
+        return disposeBag
     }
     
     
@@ -130,16 +133,16 @@ public extension HHEventBus {
     ///   - target:     observer will be disposed by object
     ///   - sender:     notification sender
     ///   - handler:    the handler
-    /// - Returns: the observer, you can remove it by yourself
+    /// - Returns: the dispose bag, call bag.dispose() will remove observer
     @discardableResult
-    public class func onBackground(_ name: String, offBy target: Any? = nil, sender: Any? = nil, handler: @escaping ((Notification?) -> Void)) -> NSObjectProtocol {
+    class func onBackground(_ name: String, offBy target: Any? = nil, sender: Any? = nil, handler: @escaping ((Notification?) -> Void)) -> DisposeBag {
         return on(name, offBy: target, sender: sender, queue: OperationQueue(), handler: handler)
     }
     
     /// unsubscribe event by name
     /// will unsubscribe all observers with the same name
     /// - Parameter name: the name of event
-    public class func off(_ name: String) {
+    class func off(_ name: String) {
         let id = UInt(bitPattern: ObjectIdentifier(name as AnyObject))
         let center = NotificationCenter.default
         shared.queue.sync {
@@ -157,7 +160,7 @@ public extension HHEventBus {
     /// - Parameters:
     ///   - name:       the name of event
     ///   - observer:   he subscribed observer
-    public class func off(_ name: String, observer: NSObjectProtocol) {
+    class func off(_ name: String, observer: NSObjectProtocol) {
         let id = UInt(bitPattern: ObjectIdentifier(name as AnyObject))
         let center = NotificationCenter.default
         shared.queue.sync {
