@@ -15,13 +15,17 @@ Pod::Spec.new do |s|
   s.author           = { 'ws00801526' => '3057600441@qq.com' }
   s.source           = { :git => 'https://github.com/ws00801526/Hermes.git', :tag => s.version.to_s }
   s.ios.deployment_target = '8.0'
-  s.default_subspecs = 'Router', 'EventBus'
-  s.swift_version = '4.2'
+  s.default_subspecs = 'Router', 'EventBus', 'Module'
+  s.swift_version = '5.0'
   s.subspec 'Router' do |ss|
-      ss.source_files = 'Hermes/Classes/HHRouter.swift'
+      ss.source_files = 'Hermes/Classes/Router.swift'
   end
 
   s.subspec 'EventBus' do |ss|
-      ss.source_files = 'Hermes/Classes/HHEventBus.swift'
+      ss.source_files = 'Hermes/Classes/EventBus.swift'
   end
+  
+  s.subspec 'Module' do |ss|
+      ss.source_files = 'Hermes/Classes/Module.swift', 'Hermes/Classes/Items.swift'
+    end
 end
