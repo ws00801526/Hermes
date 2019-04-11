@@ -1,9 +1,9 @@
 //
-//  HHEventBusTests.swift
+//  EventBusTests.swift
 //  Hermes
 //
 //  Created by XMFraker on 2019/4/1.
-//Copyright © 2019 CocoaPods. All rights reserved.
+//  Copyright © 2019 CocoaPods. All rights reserved.
 //
 
 import Quick
