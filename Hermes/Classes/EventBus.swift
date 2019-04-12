@@ -27,6 +27,16 @@ public class DisposeBag {
         if let observer = observer { EventBus.off(name, observer: observer) }
     }
     
+    public func dispose(by target: AnyObject) {
+        
+        let pointer = withUnsafePointer(to: &Key) { $0 }
+        if let bags = objc_getAssociatedObject(target, pointer) as? [DisposeBag] {
+            objc_setAssociatedObject(target, &Key, [self] + bags, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        } else {
+            objc_setAssociatedObject(target, &Key, [self], .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        }
+    }
+    
     deinit {
         dispose()
     }
@@ -88,18 +98,16 @@ public extension EventBus {
 
 public extension EventBus {
     
-    
     /// Subscribe a event notfication
     ///
     /// - Parameters:
     ///   - name:       notification name
-    ///   - target:     observer will be disposed by object
     ///   - sender:     notification sender
     ///   - queue:      the queue will execute the handler. If you pass nil, the block is run synchronously on the posting thread.
     ///   - handler:    the handler
     /// - Returns: the dispose bag, call bag.dispose() will remove observer
     @discardableResult
-    class func on(_ name: String, offBy target: Any? = nil, sender: Any? = nil, queue: OperationQueue? = nil, handler: @escaping ((Notification?) -> Void)) -> DisposeBag {
+    class func on(_ name: String, sender: Any? = nil, queue: OperationQueue? = nil, handler: @escaping ((Notification?) -> Void)) -> DisposeBag {
         
         let id = UInt(bitPattern: ObjectIdentifier(name as AnyObject))
         let notification: Notification.Name = Notification.Name.init(name)
@@ -114,15 +122,7 @@ public extension EventBus {
             }
         }
         
-        let disposeBag = DisposeBag(name, observer: observer)
-        // support automatice remove observer after target is deinit
-        if let target = target {
-            let pointer = withUnsafePointer(to: &Key) { $0 }
-            if let bag = objc_getAssociatedObject(target, pointer) as? DisposeBag { return bag }
-            objc_setAssociatedObject(target, &Key, disposeBag, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-
-        return disposeBag
+        return DisposeBag(name, observer: observer)
     }
     
     
@@ -130,13 +130,12 @@ public extension EventBus {
     ///
     /// - Parameters:
     ///   - name:       notification name
-    ///   - target:     observer will be disposed by object
     ///   - sender:     notification sender
     ///   - handler:    the handler
     /// - Returns: the dispose bag, call bag.dispose() will remove observer
     @discardableResult
-    class func onBackground(_ name: String, offBy target: Any? = nil, sender: Any? = nil, handler: @escaping ((Notification?) -> Void)) -> DisposeBag {
-        return on(name, offBy: target, sender: sender, queue: OperationQueue(), handler: handler)
+    class func onBackground(_ name: String, sender: Any? = nil, handler: @escaping ((Notification?) -> Void)) -> DisposeBag {
+        return on(name, sender: sender, queue: OperationQueue(), handler: handler)
     }
     
     /// unsubscribe event by name
