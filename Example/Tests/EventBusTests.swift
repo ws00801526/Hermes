@@ -18,6 +18,7 @@ class Bag {
 class EventBusTests: QuickSpec {
     override func spec() {
 
+        let bag = Bag()
         
         describe("basic usage") {
             
@@ -26,33 +27,30 @@ class EventBusTests: QuickSpec {
                 var basicCount = 0
                 var basicAutoCount = 0
                 var basicManualCount = 0
-                var bag: Bag? = Bag()
 
                 EventBus.on("basic") { _ in
                     // this should receive over one time
                     print("here is basic")
                     basicCount += 1
-                }
+                }.dispose(by: bag)
                 
-                EventBus.on("basic", offBy: bag) { _ in
+                EventBus.on("basic") { _ in
                     // this should only receive one time
                     print("here is basic with automatic remove observer")
                     basicAutoCount += 1
-                }
+                }.dispose(by: bag)
                 
-                let observer = EventBus.on("basic", handler: { _ in
+                let disposeBag = EventBus.on("basic", handler: { _ in
                     print("here is basic with manually remove observer")
                     basicManualCount += 1
                 })
                 
                 EventBus.post("basic")
-                
-                bag = nil
-                NotificationCenter.default.removeObserver(observer)
+                disposeBag.dispose()
                 EventBus.post("basic")
 
                 expect(basicCount).toEventually(equal(2))
-                expect(basicAutoCount).toEventually(equal(1))
+                expect(basicAutoCount).toEventually(equal(2))
                 expect(basicManualCount).toEventually(equal(1))
             })
             
@@ -68,7 +66,7 @@ class EventBusTests: QuickSpec {
                     EventBus.on("queue", handler: { _ in
                         print("here is queue")
                         queue += 1
-                    })
+                    }).dispose(by: bag)
                 }
                 
                 it("test with queue", closure: {
@@ -84,7 +82,6 @@ class EventBusTests: QuickSpec {
                     }
                     expect(queue).to(equal(11))
                 })
-                
             })
         }
     }

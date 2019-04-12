@@ -33,9 +33,26 @@ class ViewController: UIViewController {
 //        }
         
         HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "asap"], style: .asap, coalesceMask: [.none])
-        
-        HHEventBus.post("simple", sender: nil, userInfo: ["xxxx" : "now"], style: .now, coalesceMask: [.none])
+        EventBus.on("simple") { print("simple \($0?.userInfo ?? [:])") }.dispose(by: label)
+        EventBus.on("simple2") { print("simple2 \($0?.userInfo ?? [:])") }.dispose(by: label)
 
+        EventBus.post("simple", sender: nil, userInfo: ["xxxx" : "asap"], style: .asap, coalesceMask: [.none])
+        
+        EventBus.post("simple", sender: nil, userInfo: ["xxxx" : "now"], style: .now, coalesceMask: [.none])
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.0) {
+            EventBus.post("simple2", sender: nil, userInfo: ["xxxx" : "asap"], style: .now, coalesceMask: [.none])
+            EventBus.post("simple", sender: nil, userInfo: ["xxxx" : "asap"], style: .now, coalesceMask: [.none])
+            
+            label.removeFromSuperview()
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+                print("label is removefrom from superView ")
+                EventBus.post("simple2", sender: nil, userInfo: ["xxxx" : "asap"], style: .now, coalesceMask: [.none])
+                EventBus.post("simple", sender: nil, userInfo: ["xxxx" : "asap"], style: .now, coalesceMask: [.none])
+            })
+        }
+        
 //        print("before sleep")
 //        sleep(200)
 //        print("after sleep")
