@@ -15,16 +15,18 @@ public enum Priority: UInt {
 
 public protocol Module: NSObjectProtocol {
     
+    /// the priority of module, The higher the priority, the earlier the execution
     var priority: Priority { get }
+    /// the module is asynchronous, if true, the `setup` method will be executed using DispatchQueue.main()
     var isAsync : Bool     { get }
     
     ////////////////////////////////////
     // App Life Cycle
     ////////////////////////////////////
-    
-    func modInit(_ context: Context)
+
+    func modSetup(_ context: Context)
     func modSplash(_ context: Context)
-    
+
     func modWillEnterForeground(_ context: Context)
     func modDidBecomeActive(_ context: Context)
     
@@ -196,7 +198,7 @@ open class AppDelegate: UIResponder, UIApplicationDelegate {
     
     @available(iOS, introduced: 4.2, deprecated: 9.0)
     open func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        ModuleManager.shared.context.openURLItem = OpenURLItem(url, sourceApplication: sourceApplication, annotation: annotation)
+        ModuleManager.shared.context.openURLItem = OpenURLItem(url, sourceApplication: sourceApplication)
         if let succ = ModuleManager.trigger(.openURL) as? Bool { return succ }
         return false
     }
@@ -298,8 +300,8 @@ public class ModuleManager {
 public extension Event {
 
     static let setup: Event = Event(rawValue: { (modules, context) -> Any? in
-        modules.filter { !$0.isAsync }.forEach { $0.modInit(context) }
-        DispatchQueue.main.async { modules.filter { $0.isAsync }.forEach { $0.modInit(context) } }
+        modules.filter { !$0.isAsync }.forEach { $0.modSetup(context) }
+        DispatchQueue.main.async { modules.filter { $0.isAsync }.forEach { $0.modSetup(context) } }
         return nil
     })
     
@@ -410,7 +412,7 @@ public extension Module {
     // App Life Cycle
     ////////////////////////////////////
     
-    func modInit(_ context: Context) {}
+    func modSetup(_ context: Context) {}
     func modSplash(_ context: Context) {}
     
     func modWillEnterForeground(_ context: Context) {}
