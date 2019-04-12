@@ -18,12 +18,12 @@ func basic() {
 // subscribe event with name
 HHEventBus.on("event name") { note in
 // here is notification handler
-}
+}.dispose(by: someTarget)
 
 // subscribe event with name and handler will be executed in background
 HHEventBus.onBackground("event name") { note in
 
-}
+}.dispose(by: someTarget)
 
 // post a note with name
 HHEventBus.post("event name")
