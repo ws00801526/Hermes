@@ -109,34 +109,34 @@ internal extension NotificationItem {
 public extension NotificationItem {
     
     private struct UNNotificationKey {
-        static var center: Int = 100
-        static var handler: Int = 101
-        static var response: Int = 102
-        static var notification: Int = 103
+        static let center: Int = 100
+        static let handler: Int = 101
+        static let response: Int = 102
+        static let notification: Int = 103
     }
     
     typealias PresentationHandler = (UNNotificationPresentationOptions) -> Void
     /// The central object for managing notification-related activities for your app or app extension.
     var center: UNUserNotificationCenter? {
-        get { return objc_getAssociatedObject(self, &UNNotificationKey.center) as? UNUserNotificationCenter }
-        set { objc_setAssociatedObject(self, &UNNotificationKey.center, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        get { return objc_getAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.center) { return $0 }) as? UNUserNotificationCenter }
+        set { objc_setAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.center) { return $0 }, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     /// The notification that is about to be delivered. Use the information in this object to determine an appropriate course of action. For example, you might use the information to update your app’s interface.
     var notification: UNNotification? {
-        get { return objc_getAssociatedObject(self, &UNNotificationKey.notification) as? UNNotification }
-        set { objc_setAssociatedObject(self, &UNNotificationKey.notification, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        get { return objc_getAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.notification) { return $0 }) as? UNNotification }
+        set { objc_setAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.notification) { return $0 }, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
-    /// The user’s response to the notification. This object contains the original notification and the identifier string for the selected action. If the action allowed the user to provide a textual response, this parameter contains a UNTextInputNotificationResponse object.
+    /// The user’s response to the notification. This object contains   the original notification and the identifier string for the selected action. If the action allowed the user to provide a textual response, this parameter contains a UNTextInputNotificationResponse object.
     var notificationResponse: UNNotificationResponse? {
-        get { return objc_getAssociatedObject(self, &UNNotificationKey.response) as? UNNotificationResponse }
-        set { objc_setAssociatedObject(self, &UNNotificationKey.response, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        get { return objc_getAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.response) { return $0 }) as? UNNotificationResponse }
+        set { objc_setAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.response) { return $0 }, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
 
     /// The block to execute with the presentation option for the notification. Always execute this block at some point during your implementation of this method. Use the options parameter to specify how you want the system to alert the user, if at all. This block has no return value and takes the following parameter:
     var presentationHandler: PresentationHandler? {
-        get { return objc_getAssociatedObject(self, &UNNotificationKey.handler) as? PresentationHandler }
-        set { objc_setAssociatedObject(self, &UNNotificationKey.handler, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC) }
+        get { return objc_getAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.handler) { return $0 }) as? PresentationHandler }
+        set { objc_setAssociatedObject(self, withUnsafePointer(to: UNNotificationKey.handler) { return $0 }, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC) }
     }
     
     internal init(center: UNUserNotificationCenter, notification: UNNotification, presentationHandler: @escaping PresentationHandler) {

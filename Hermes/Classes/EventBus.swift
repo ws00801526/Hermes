@@ -12,7 +12,7 @@ fileprivate struct CachedObserver {
     let observer: NSObjectProtocol
 }
 
-fileprivate var Key: Int = 101
+fileprivate let Key: Int = 101
 public class DisposeBag {
     
     let name: String
@@ -29,11 +29,11 @@ public class DisposeBag {
     
     public func dispose(by target: AnyObject) {
         
-        let pointer = withUnsafePointer(to: &Key) { $0 }
+        let pointer = withUnsafePointer(to: Key) { $0 }
         if let bags = objc_getAssociatedObject(target, pointer) as? [DisposeBag] {
-            objc_setAssociatedObject(target, &Key, [self] + bags, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+            objc_setAssociatedObject(target, pointer, [self] + bags, .OBJC_ASSOCIATION_COPY_NONATOMIC)
         } else {
-            objc_setAssociatedObject(target, &Key, [self], .OBJC_ASSOCIATION_COPY_NONATOMIC)
+            objc_setAssociatedObject(target, pointer, [self], .OBJC_ASSOCIATION_COPY_NONATOMIC)
         }
     }
     
